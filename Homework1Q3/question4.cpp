@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 
 using namespace std; 
 
@@ -7,33 +8,33 @@ struct adjNode {
 	adjNode* next = NULL; 
 };
 
-struct edge {
-	int start, end; 
-};
-
 class Graph {
 	int numNodes;
 public:
-	adjNode* heads[numNodes];
-	Graph(int nodeList) {
+	//adjNode** heads;
+	vector<adjNode*> heads; 
+	Graph(int nodeList[]) {
 		numNodes = nodeList[0]; // list[0] is the number of nodes in the graph.
+		for (int i=0; i<numNodes; i++){
+			heads.push_back(nullptr);
+		}
 		int i = 1;
 		int j = 2;
 		while (nodeList[i] >= 0 && nodeList[j] >= 0) {
 			adjNode* edge = new adjNode;
 			edge->val = nodeList[j];
-			if (heads[i] == NULL) {
+			if (heads[i] == nullptr) {
 				heads[i] = edge;
+				i, j += 2; 
 				continue;
 			}
-			adjNode* endNode = heads[i];
-			while (endNode->next != NULL) {
-				endNode = endNode->next;
-			}
-			endNode->next = edge;
-			j = j + 2;
-			i = i + 2;
+			edge->next = heads[i];
+			heads[i] = edge;
+			i, j += 2; 
 		}
+	}
+	/*int getNumNodes() {
+		return numNodes;
 	}
 	string edgeAddition(int from, int to) {
 		if (from > numNodes || to > numNodes) {
@@ -45,7 +46,7 @@ public:
 			heads[from] = edge;
 		}
 		else {
-			adjNode* endNode = heads[i];
+			adjNode* endNode = heads[from];
 			while (endNode->next != NULL) {
 				endNode = endNode->next;
 			}
@@ -75,12 +76,42 @@ public:
 		}
 		return "Edge was not found";
 	}
+	~Graph(){
+		delete numNodes;
+		delete heads;
+	} */ 
 };
  
+/*int* DFS(Graph G, int v) {
+	const int length = G.getNumNodes();
+	int dfs[length];
+	int mark[length];
+	mark[v] = 1;
+	if (G.heads[v] = NULL){
+		return;
+	}
+	adjNode* currNode = G.heads[v];
+	while (currNode->next != NULL){
+		if (mark[currNode->val] == 0){
+			dfs = v + DFS(G, currNode->val);
+		}
+		currNode = currNode->next;
+	}
+	return &dfs;
+};*/
+
 int main() {
 
-	int graphList = { 5,0,1,1,4,2,3,1,3,3,4,-1 };
-	Graph graph = new Graph(graphList);
+	int graphList[12] = {5,0,1,1,4,2,3,1,3,3,4,-1};
+	/*edge edgeList[5], temp;
+	int j = 0; 
+	for (int i = 1; i != -1; i += 2) {
+		temp.start = graphList[i]; 
+		temp.end = graphList[i + 1]; 
+		edgeList[j] = temp; 
+		j++; 
+	} */
+	Graph graph(graphList);
 
 	return 0; // Hi Justin <3
 };
