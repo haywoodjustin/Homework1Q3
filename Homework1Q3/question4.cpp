@@ -61,12 +61,19 @@ public:
 			// There are no edges associated with the given from vertex.
 			return "Given from vertex does not have any associated edges."; 
 		}
-		adjNode* currNode = heads[i];
+		if (heads[from]->val == to){
+			heads[from] = NULL;
+			return "Edge deleted succesfully";
+		}
+		adjNode* currNode = heads[from];
 		while (currNode->next != NULL) {
-			if (currNode)
+			if (currNode->next->val == to){
+				currNode->next = currNode->next->next;
+				return "Edge deleted succesfully";
+			}
 			currNode = currNode->next;
 		}
-		return "Edge deleted succesfully";
+		return "Edge was not found";
 	}
 };
  
