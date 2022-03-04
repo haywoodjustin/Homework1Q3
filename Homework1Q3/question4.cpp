@@ -141,26 +141,22 @@ vector<int> DFS(Graph G, int v, vector<int> mark = {}) {
 	return dfs;
 };
 
-//void Components(Graph G) {
-//	vector<int> mark;
-//	vector<vector<int>> parent;
-//	for (unsigned int i = 0; i < G.getNumNodes(); i++) {
-//		parent.push_back({ -1 });
-//		mark.push_back(0);
-//	}
-//	for (unsigned int i = 0; i < G.getNumNodes(); i++) {
-//		if (mark[i] == 0) {
-//			vector<int> temp = DFS(G, i);
-//			for (unsigned int j = 0; j < temp.size(); j++) {
-//				mark[temp[j]] = 1;
-//				if (temp[j] != i) {
-//					parent[temp[j]] = i;
-//				}
-//			}
-//		}
-//	}
-//
-//}
+vector<vector<int>> Components(Graph G) {
+	vector<int> mark(G.getNumNodes(), 0);
+	vector<vector<int>> parent;
+
+	for (int i = 0; i < G.getNumNodes(); i++) {
+		if (mark[i] == 0) {
+			vector<int> temp = DFS(G, i);
+			parent.push_back(temp);
+
+			for (int j = 0; j < temp.size(); j++) {
+				mark[temp[j]] = 1;
+			}
+		}
+	}
+	return parent;
+}
 
 int main() {
 
@@ -181,7 +177,19 @@ int main() {
 	cout << endl;
 	graph.printList();
 	cout << endl;
-	//Components(graph);
+	//component test
+	int graphList2[14] = { 7,0,1,1,4,2,3,1,3,3,4,5, 6, -1 };
+	Graph graph2(graphList2);
+	vector<vector<int>> res = Components(graph2);
+	for (vector<int> v : res) {
+		for (int i : v) {
+			cout << i << endl;
+		}
+		cout << endl;
+	}
 	cout << endl;
+	
+	
+	
 	return 0;
 }
