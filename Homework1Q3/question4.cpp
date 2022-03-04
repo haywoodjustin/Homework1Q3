@@ -21,26 +21,15 @@ public:
 		int i = 1;
 		int j = 2;
 		while (nodeList[i] >= 0 && nodeList[j] >= 0) { //Add first integer as origin and second as destination 
-			adjNode* edge = new adjNode;
-			edge->val = nodeList[j];
-			if (heads[nodeList[i]] == nullptr) { //heads[nodeList[i]] takes the origin vector from nodeList and is used to reference the same origin point in the edge vector 
-				heads[nodeList[i]] = edge; //add adges if origin is null 
-			//	cout << nodeList[i] << ", " << heads[nodeList[i]]->val << endl;
-				i += 2;
-				j += 2;
-				continue;
-			}
-			edge->next = heads[nodeList[i]];
-			heads[nodeList[i]] = edge; //add edges if origin is not null 
-			//cout << nodeList[i] << ", " << heads[nodeList[i]]->val << endl;
+			edgeAddition(nodeList[i], nodeList[j]);
 			i += 2;		 //adding new destinations to the front of the list, not the back  
 			j += 2;
 		}
 	}
 
-	void printList(int n) { //Prints adjacency list for test purposes 
+	void printList() { //Prints adjacency list for test purposes 
 		adjNode* curr = new adjNode;
-		for (int i = 0; i < n; i++) {
+		for (int i = 0; i < numNodes; i++) {
 			curr = heads[i]; //pointer that iterates through the linked list 
 			cout << i << ": ";
 			while (curr != nullptr) { //While there is a list available 
@@ -55,55 +44,68 @@ public:
 		return numNodes;
 	}
 
-	void edgeAddition(int from, int to) {
-		if (from > numNodes || to > numNodes) {
-			cout << "Invalid vertex given." << endl; // Can't add an edge to a vertex that doesn't exist.
+	string edgeAddition(int first, int second) {
+		if (first > numNodes || second > numNodes) {
+			return "Invalid vertex given."; // Can't add an edge to a vertex that doesn't exist.
 		}
 		adjNode* edge = new adjNode;
-		edge->val = to;
-		if (heads[from] == NULL) { //If head is null, add with no other work needed 
-			heads[from] = edge;
+		edge->val = second;
+		if (heads[first] == NULL) { //If head is null, add with no other work needed 
+			heads[first] = edge;
 		}
 		else {
-			adjNode* endNode = heads[from];
-			while (endNode->next != NULL) { //If head is not null, iterate through edges, add to back 
-				endNode = endNode->next;
+			// We will search to see if the edge already exists first. We only need to do this once since the
+			// graph is bidirectional. Also, this wouldn't apply to the above condition because if heads[first]
+			// is empty then the edge cannot already exist.
+			adjNode* currNode = heads[first];
+			while (currNode != nullptr) {
+				if (currNode->val == second) {
+					return "The edge already exists.";
+				}
+				currNode = currNode->next;
 			}
-			endNode->next = edge;
+
+			edge->next = heads[first]->next;
+			heads[first]->next = edge; // If head is not null, add the edge to the front of the list.
 		}
-		cout << "Edge added succesfully." << endl;
+		edge = new adjNode;
+		edge->val = first;
+		if (heads[second] == NULL) { //If head is null, add with no other work needed 
+			heads[second] = edge;
+		}
+		else {
+			edge->next = heads[second]->next;
+			heads[second]->next = edge; // If head is not null, add the edge to the front of the list.
+		}
+		return "Edge added succesfully.";
 	}
 
-	void edgeDeletion(int from, int to) {
-		if (from > numNodes || to > numNodes) {
-			cout << "Invalid vertex given." << endl; // Can't delete an edge to a vertex that doesn't exist.
-			return; 
+	string edgeDeletion(int first, int second) {
+		if (first > numNodes || second > numNodes) {
+			return "Invalid vertex given."; // Can't delete an edge to a vertex that doesn't exist.
 		}
-		if (heads[from] == NULL) {
+		if (heads[first] == NULL) {
 			// There are no edges associated with the given from vertex.
-			cout << "Given destination vertex does not have any associated edges." << endl; 
-			return; 
+			return "Given source vertex does not have any associated edges.";
 		}
-		adjNode* currNode = heads[from];
-		if (heads[from]->val == to) { //If the first node is the given node 
-			currNode = heads[from];
-			heads[from] = currNode->next; 
-			delete currNode; 
-			cout << "Edge deleted succesfully" << endl; 
-			return; 
+		adjNode* currNode = heads[first];
+		if (heads[first]->val == second) { //If the first node is the given node 
+			currNode = heads[first];
+			heads[first] = currNode->next;
+			delete currNode;
+			return "Edge deleted succesfully";
 		}
-		adjNode* prev = new adjNode; 
+		adjNode* prev = new adjNode;
 		while (currNode->next != NULL) { //If we need to search the list for the given node 
-			if (currNode->next -> val == to) {
+			if (currNode->next->val == second) {
 				prev = currNode;    //Assign previous pointer to node behind deletion node
-				currNode = currNode->next;  
+				currNode = currNode->next;
 			}
 			prev->next = currNode->next; //Link previous node to node ahead of deletion node 
 			delete currNode;  //Delete given node 
-			cout << "Edge deleted succesfully" << endl;
-			return; 
+			return "Edge deleted succesfully";
 		}
-		cout << "Edge was not found" << endl; 
+		return "Edge was not found";
 	}
 
 	~Graph() {
@@ -119,8 +121,9 @@ vector<int> DFS(Graph G, int v, vector<int> mark = {}) {
 		}
 	}
 	dfs = { v };
+	mark[v] = 1;
 	if (G.heads[v] == NULL) {
-		return {v};
+		return { v };
 	}
 	adjNode* currNode = G.heads[v];
 	while (currNode != NULL) {
@@ -138,19 +141,47 @@ vector<int> DFS(Graph G, int v, vector<int> mark = {}) {
 	return dfs;
 };
 
+//void Components(Graph G) {
+//	vector<int> mark;
+//	vector<vector<int>> parent;
+//	for (unsigned int i = 0; i < G.getNumNodes(); i++) {
+//		parent.push_back({ -1 });
+//		mark.push_back(0);
+//	}
+//	for (unsigned int i = 0; i < G.getNumNodes(); i++) {
+//		if (mark[i] == 0) {
+//			vector<int> temp = DFS(G, i);
+//			for (unsigned int j = 0; j < temp.size(); j++) {
+//				mark[temp[j]] = 1;
+//				if (temp[j] != i) {
+//					parent[temp[j]] = i;
+//				}
+//			}
+//		}
+//	}
+//
+//}
+
 int main() {
 
 	int graphList[12] = { 5,0,1,1,4,2,3,1,3,3,4,-1 };
 	Graph graph(graphList);
-	graph.printList(5);
-	vector<int> output = DFS(graph, 1);
+	graph.printList();
+	vector<int> output = DFS(graph, 0);
 	cout << endl;
 	for (int i = 0; i < output.size(); i++) {
 		cout << output[i] << " ";
 	}
-	graph.edgeDeletion(4, 3); 
 	cout << endl;
-	graph.printList(5);
-	cout << endl; 
+	cout << graph.edgeAddition(4, 3) << endl;
+	cout << endl;
+	graph.printList();
+	cout << endl;
+	cout << graph.edgeDeletion(4, 3) << endl;
+	cout << endl;
+	graph.printList();
+	cout << endl;
+	//Components(graph);
+	cout << endl;
 	return 0;
 }
