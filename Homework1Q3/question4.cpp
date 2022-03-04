@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <string>
 
 using namespace std;
 
@@ -141,33 +142,53 @@ vector<int> DFS(Graph G, int v, vector<int> mark = {}) {
 	return dfs;
 };
 
-//void Components(Graph G) {
-//	vector<int> mark;
-//	vector<vector<int>> parent;
-//	for (unsigned int i = 0; i < G.getNumNodes(); i++) {
-//		parent.push_back({ -1 });
-//		mark.push_back(0);
-//	}
-//	for (unsigned int i = 0; i < G.getNumNodes(); i++) {
-//		if (mark[i] == 0) {
-//			vector<int> temp = DFS(G, i);
-//			for (unsigned int j = 0; j < temp.size(); j++) {
-//				mark[temp[j]] = 1;
-//				if (temp[j] != i) {
-//					parent[temp[j]] = i;
-//				}
-//			}
-//		}
-//	}
-//
-//}
+string Components(Graph G) {
+	vector<int> mark;
+	vector<int> parent;
+	string result = "";
+	for (unsigned int i = 0; i < G.getNumNodes(); i++) {
+		parent.push_back(-1);
+		mark.push_back(0);
+	}
+	// Get the parent array in order before we format the result string
+	for (unsigned int i = 0; i < G.getNumNodes(); i++) {
+		if (mark[i] == 0) {
+			vector<int> temp = DFS(G, i);
+			for (unsigned int j = 0; j < temp.size(); j++) {
+				mark[temp[j]] = 1;
+				if (temp[j] != i) {
+					parent[temp[j]] = i;
+				}
+			}
+		}
+	}
+	// Now we can format the result string using the completed parent list.
+	for (unsigned int i = 0; i < parent.size(); i++) {
+		if (parent[i] == -1) {
+			// Theoretically, there should only be one vertex with a value of -1 for the parent
+			// per connected component. Therefore, doing a DFS on that vertex will yield it's
+			// respective component.
+			result += "{";
+			vector<int> temp = DFS(G, i);
+			for (unsigned int j = 0; j < temp.size(); j++) {
+				if (j == temp.size() - 1) {
+					result += to_string(temp[j]) + "}";
+				}
+				else {
+					result += to_string(temp[j]) + ", ";
+				}
+			}
+		}
+	}
+	return result;
+}
 
 int main() {
 
 	int graphList[12] = { 5,0,1,1,4,2,3,1,3,3,4,-1 };
 	Graph graph(graphList);
 	graph.printList();
-	vector<int> output = DFS(graph, 0);
+	vector<int> output = DFS(graph, 1);
 	cout << endl;
 	for (int i = 0; i < output.size(); i++) {
 		cout << output[i] << " ";
@@ -181,7 +202,7 @@ int main() {
 	cout << endl;
 	graph.printList();
 	cout << endl;
-	//Components(graph);
+	cout << Components(graph) << endl;
 	cout << endl;
 	return 0;
 }
