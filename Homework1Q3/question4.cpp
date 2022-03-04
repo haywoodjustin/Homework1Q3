@@ -54,46 +54,58 @@ public:
 	int getNumNodes() {
 		return numNodes;
 	}
-	string edgeAddition(int from, int to) {
+
+	void edgeAddition(int from, int to) {
 		if (from > numNodes || to > numNodes) {
-			return "Invalid vertex given."; // Can't add an edge to a vertex that doesn't exist.
+			cout << "Invalid vertex given." << endl; // Can't add an edge to a vertex that doesn't exist.
 		}
 		adjNode* edge = new adjNode;
 		edge->val = to;
-		if (heads[from] == NULL) {
+		if (heads[from] == NULL) { //If head is null, add with no other work needed 
 			heads[from] = edge;
 		}
 		else {
 			adjNode* endNode = heads[from];
-			while (endNode->next != NULL) {
+			while (endNode->next != NULL) { //If head is not null, iterate through edges, add to back 
 				endNode = endNode->next;
 			}
 			endNode->next = edge;
 		}
-		return "Edge added succesfully.";
+		cout << "Edge added succesfully." << endl;
 	}
-	string edgeDeletion(int from, int to) {
+
+	void edgeDeletion(int from, int to) {
 		if (from > numNodes || to > numNodes) {
-			return "Invalid vertex given."; // Can't delete an edge to a vertex that doesn't exist.
+			cout << "Invalid vertex given." << endl; // Can't delete an edge to a vertex that doesn't exist.
+			return; 
 		}
 		if (heads[from] == NULL) {
 			// There are no edges associated with the given from vertex.
-			return "Given from vertex does not have any associated edges.";
-		}
-		if (heads[from]->val == to) {
-			heads[from] = NULL;
-			return "Edge deleted succesfully";
+			cout << "Given destination vertex does not have any associated edges." << endl; 
+			return; 
 		}
 		adjNode* currNode = heads[from];
-		while (currNode->next != NULL) {
-			if (currNode->next->val == to) {
-				currNode->next = currNode->next->next;
-				return "Edge deleted succesfully";
-			}
-			currNode = currNode->next;
+		if (heads[from]->val == to) { //If the first node is the given node 
+			currNode = heads[from];
+			heads[from] = currNode->next; 
+			delete currNode; 
+			cout << "Edge deleted succesfully" << endl; 
+			return; 
 		}
-		return "Edge was not found";
+		adjNode* prev = new adjNode; 
+		while (currNode->next != NULL) { //If we need to search the list for the given node 
+			if (currNode->next -> val == to) {
+				prev = currNode;    //Assign previous pointer to node behind deletion node
+				currNode = currNode->next;  
+			}
+			prev->next = currNode->next; //Link previous node to node ahead of deletion node 
+			delete currNode;  //Delete given node 
+			cout << "Edge deleted succesfully" << endl;
+			return; 
+		}
+		cout << "Edge was not found" << endl; 
 	}
+
 	~Graph() {
 		//delete& heads;
 	}
@@ -136,6 +148,9 @@ int main() {
 	for (int i = 0; i < output.size(); i++) {
 		cout << output[i] << " ";
 	}
+	graph.edgeDeletion(4, 3); 
 	cout << endl;
+	graph.printList(5);
+	cout << endl; 
 	return 0;
 }
