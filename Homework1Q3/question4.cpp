@@ -25,33 +25,32 @@ public:
 			edge->val = nodeList[j];
 			if (heads[nodeList[i]] == nullptr) { //heads[nodeList[i]] takes the origin vector from nodeList and is used to reference the same origin point in the edge vector 
 				heads[nodeList[i]] = edge; //add adges if origin is null 
-				cout << nodeList[i] << ", " << heads[nodeList[i]]; 
+			//	cout << nodeList[i] << ", " << heads[nodeList[i]]->val << endl;
 				i += 2;
 				j += 2; 
 				continue;
 			}
 			edge->next = heads[nodeList[i]];
 			heads[nodeList[i]] = edge; //add edges if origin is not null 
+			//cout << nodeList[i] << ", " << heads[nodeList[i]]->val << endl;
 			i += 2;		 //adding new destinations to the front of the list, not the back  
 			j += 2; 
 		}
 	}
 	
-	void printList(int n) {
+	void printList(int n) { //Prints adjacency list for test purposes 
 		adjNode* curr = new adjNode; 
 		for (int i = 0; i < n; i++) {
-			curr = heads[i]; 
-			cout << i << ": ";
-			if (curr == nullptr) {
-				continue; 
-			}
-			while (curr->next != nullptr) {
-				cout << curr->val << " "; 
-				curr = curr->next;
+			curr = heads[i]; //pointer that iterates through the vector 
+			cout << i << ": "; 
+			while (curr != nullptr) { //While there is a list available 
+				cout << curr->val << " "; //Print out the adjacent nodes and increment curr 
+				curr = curr->next; 
 			}
 			cout << endl; 
 		}
 	}
+
 	/*int getNumNodes() {
 		return numNodes;
 	}
@@ -123,6 +122,6 @@ int main() {
 
 	int graphList[12] = {5,0,1,1,4,2,3,1,3,3,4,-1};
 	Graph graph(graphList); 
-	graph.printList(10); 
+	graph.printList(5); 
 	return 0; // Hi Justin <3
 };
