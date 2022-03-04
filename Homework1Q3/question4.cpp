@@ -5,32 +5,51 @@ using namespace std;
 
 struct adjNode {
 	int val;
-	adjNode* next = NULL; 
+	adjNode* next = nullptr; 
 };
 
 class Graph {
 	int numNodes;
+	
 public:
-	//adjNode** heads;
-	vector<adjNode*> heads; 
+	vector<adjNode*> heads;  // {5,0,1,1,4,2,3,1,3,3,4,-1};
 	Graph(int nodeList[]) {
 		numNodes = nodeList[0]; // list[0] is the number of nodes in the graph.
 		for (int i=0; i<numNodes; i++){
-			heads.push_back(nullptr);
+			heads.push_back(nullptr); //Initialize null ptrs in vector 
 		}
 		int i = 1;
-		int j = 2;
-		while (nodeList[i] >= 0 && nodeList[j] >= 0) {
+		int j = 2; 
+		while (nodeList[i] >= 0 && nodeList[j] >= 0) { //Add first integer as origin and second as destination 
 			adjNode* edge = new adjNode;
 			edge->val = nodeList[j];
-			if (heads[i] == nullptr) {
-				heads[i] = edge;
-				i, j += 2; 
+			if (heads[nodeList[i]] == nullptr) { //heads[nodeList[i]] takes the origin vector from nodeList and is used to reference the same origin point in the edge vector 
+				heads[nodeList[i]] = edge; //add adges if origin is null 
+				cout << nodeList[i] << ", " << heads[nodeList[i]]; 
+				i += 2;
+				j += 2; 
 				continue;
 			}
-			edge->next = heads[i];
-			heads[i] = edge;
-			i, j += 2; 
+			edge->next = heads[nodeList[i]];
+			heads[nodeList[i]] = edge; //add edges if origin is not null 
+			i += 2;		 //adding new destinations to the front of the list, not the back  
+			j += 2; 
+		}
+	}
+	
+	void printList(int n) {
+		adjNode* curr = new adjNode; 
+		for (int i = 0; i < n; i++) {
+			curr = heads[i]; 
+			cout << i << ": ";
+			if (curr == nullptr) {
+				continue; 
+			}
+			while (curr->next != nullptr) {
+				cout << curr->val << " "; 
+				curr = curr->next;
+			}
+			cout << endl; 
 		}
 	}
 	/*int getNumNodes() {
@@ -103,15 +122,7 @@ public:
 int main() {
 
 	int graphList[12] = {5,0,1,1,4,2,3,1,3,3,4,-1};
-	/*edge edgeList[5], temp;
-	int j = 0; 
-	for (int i = 1; i != -1; i += 2) {
-		temp.start = graphList[i]; 
-		temp.end = graphList[i + 1]; 
-		edgeList[j] = temp; 
-		j++; 
-	} */
-	Graph graph(graphList);
-
+	Graph graph(graphList); 
+	graph.printList(10); 
 	return 0; // Hi Justin <3
 };
