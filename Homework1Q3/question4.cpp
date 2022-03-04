@@ -106,8 +106,18 @@ public:
 		cout << "Edge was not found" << endl; 
 	}
 
-	~Graph() {
-		//delete& heads;
+	~Graph() { 
+		adjNode* curr = new adjNode; 
+		for (int i = 0; i < 5; i++) {
+			while (heads[i] != nullptr) {
+				curr = heads[i];
+				heads[i] = curr->next;
+				delete curr;  //Delete all nodes in the list 
+				curr = heads[i];
+			}
+			delete heads[i]; //Delete the pointers in the spaces of heads[i]
+		}
+		delete &heads; //Delete the entire vector heads 
 	}
 };
 
