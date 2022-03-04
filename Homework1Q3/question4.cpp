@@ -13,7 +13,7 @@ class Graph {
 	int numNodes;
 
 public:
-	vector<adjNode*> heads;  // {5,0,1,1,4,2,3,1,3,3,4,-1};
+	vector<adjNode*> heads;
 	Graph(int nodeList[]) {
 		numNodes = nodeList[0]; // list[0] is the number of nodes in the graph.
 		for (int i = 0; i < numNodes; i++) {
@@ -21,14 +21,16 @@ public:
 		}
 		int i = 1;
 		int j = 2;
-		while (nodeList[i] >= 0 && nodeList[j] >= 0) { //Add first integer as origin and second as destination 
+		while (nodeList[i] >= 0 && nodeList[j] >= 0) {
+			// Add edges in both directions and then incrament i and j.
 			edgeAddition(nodeList[i], nodeList[j]);
-			i += 2;		 //adding new destinations to the front of the list, not the back  
+			i += 2;
 			j += 2;
 		}
 	}
 
-	void printList() { //Prints adjacency list for test purposes 
+	void printList() { //Prints adjacency list
+		cout << "Adjacency List: " << endl;
 		adjNode* curr = new adjNode;
 		for (int i = 0; i < numNodes; i++) {
 			curr = heads[i]; //pointer that iterates through the linked list 
@@ -39,6 +41,7 @@ public:
 			}
 			cout << endl;
 		}
+		cout << endl;
 	}
 
 	int getNumNodes() {
@@ -86,8 +89,8 @@ public:
 			return "Invalid vertex given."; // Can't delete an edge to a vertex that doesn't exist.
 		}
 		if (heads[first] == NULL) {
-			// There are no edges associated with the given from vertex.
-			return "Given source vertex does not have any associated edges.";
+			// There are no edges associated with the given first vertex.
+			return "Given vertex does not have any associated edges.";
 		}
 		adjNode* currNode = heads[first];
 		if (heads[first]->val == second) { //If the first node is the given node 
@@ -110,7 +113,17 @@ public:
 	}
 
 	~Graph() {
-		//delete& heads;
+		// We just need to delete the pointers that are stored in heads.
+		adjNode* curr = new adjNode;
+		for (int i = 0; i < numNodes; i++) {
+			while (heads[i] != nullptr) {
+				curr = heads[i];
+				heads[i] = curr->next;
+				delete curr;  //Delete all nodes in the list 
+				curr = heads[i];
+			}
+			delete heads[i]; //Delete the pointers in the spaces of heads[i]
+		}
 	}
 };
 
@@ -118,17 +131,21 @@ vector<int> DFS(Graph G, int v, vector<int> mark = {}) {
 	vector<int> dfs;
 	if (mark.empty()) {
 		for (int i = 0; i < G.getNumNodes(); i++) {
-			mark.push_back(0);
+			mark.push_back(0); // initialize mark to be a list of 0's.
 		}
 	}
+
+	// "Visit" the current vertex (v).
 	dfs = { v };
 	mark[v] = 1;
+
 	if (G.heads[v] == NULL) {
 		return { v };
 	}
 	adjNode* currNode = G.heads[v];
 	while (currNode != NULL) {
 		if (mark[currNode->val] == 0) {
+			// If the vertex hasn't been visited, call DFS on it.
 			vector<int> temp = DFS(G, currNode->val, mark);
 			for (unsigned int i = 0; i < temp.size(); i++) {
 				dfs.push_back(temp[i]);
@@ -136,6 +153,7 @@ vector<int> DFS(Graph G, int v, vector<int> mark = {}) {
 		}
 		currNode = currNode->next;
 		for (int i = 0; i < dfs.size(); i++) {
+			// Update mark so the verticies in the DFS result are correctly marked.
 			mark[dfs[i]] = 1;
 		}
 	}
@@ -143,40 +161,31 @@ vector<int> DFS(Graph G, int v, vector<int> mark = {}) {
 };
 
 string Components(Graph G) {
-	vector<int> mark;
-	vector<int> parent;
+	vector<int> mark(G.getNumNodes(), 0);
+	vector<vector<int>> components;
 	string result = "";
-	for (unsigned int i = 0; i < G.getNumNodes(); i++) {
-		parent.push_back(-1);
-		mark.push_back(0);
-	}
-	// Get the parent array in order before we format the result string
-	for (unsigned int i = 0; i < G.getNumNodes(); i++) {
+
+	// The components list will store the results of all the DFS' done.
+	for (int i = 0; i < G.getNumNodes(); i++) {
 		if (mark[i] == 0) {
+			// Only do a DFS if the vertex hasn't been visited already.
 			vector<int> temp = DFS(G, i);
-			for (unsigned int j = 0; j < temp.size(); j++) {
+			components.push_back(temp);
+
+			for (int j = 0; j < temp.size(); j++) {
 				mark[temp[j]] = 1;
-				if (temp[j] != i) {
-					parent[temp[j]] = i;
-				}
 			}
 		}
 	}
-	// Now we can format the result string using the completed parent list.
-	for (unsigned int i = 0; i < parent.size(); i++) {
-		if (parent[i] == -1) {
-			// Theoretically, there should only be one vertex with a value of -1 for the parent
-			// per connected component. Therefore, doing a DFS on that vertex will yield it's
-			// respective component.
-			result += "{";
-			vector<int> temp = DFS(G, i);
-			for (unsigned int j = 0; j < temp.size(); j++) {
-				if (j == temp.size() - 1) {
-					result += to_string(temp[j]) + "}";
-				}
-				else {
-					result += to_string(temp[j]) + ", ";
-				}
+	// Now we can format the result string using the completed components list.
+	for (vector<int> i : components) {
+		result += "{";
+		for (unsigned int j = 0; j < i.size(); j++) {
+			if (j == i.size() - 1) {
+				result += to_string(i[j]) + "}";
+			}
+			else {
+				result += to_string(i[j]) + ", ";
 			}
 		}
 	}
@@ -185,24 +194,10 @@ string Components(Graph G) {
 
 int main() {
 
-	int graphList[12] = { 5,0,1,1,4,2,3,1,3,3,4,-1 };
+	int graphList[14] = { 7,0,1,1,4,2,3,1,3,3,4,5,6,-1 };
 	Graph graph(graphList);
 	graph.printList();
-	vector<int> output = DFS(graph, 1);
-	cout << endl;
-	for (int i = 0; i < output.size(); i++) {
-		cout << output[i] << " ";
-	}
-	cout << endl;
-	cout << graph.edgeAddition(4, 3) << endl;
-	cout << endl;
-	graph.printList();
-	cout << endl;
-	cout << graph.edgeDeletion(4, 3) << endl;
-	cout << endl;
-	graph.printList();
-	cout << endl;
-	cout << Components(graph) << endl;
-	cout << endl;
+	cout << "Components: " << endl;
+	cout << Components(graph) << endl << endl;
 	return 0;
 }
